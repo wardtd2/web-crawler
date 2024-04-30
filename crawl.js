@@ -1,3 +1,5 @@
+import { JSDOM } from 'jsdom';
+
 function normalizeURL(urlString) {
     const url = new URL(urlString);
     let path = url.pathname;
@@ -11,9 +13,14 @@ function normalizeURL(urlString) {
 
 
 function getURLsFromHTML(htmlBody, baseURL) {
-    const dom = new JSDOM(htmlBody);
-    const urls = dom.window.document.querySelectorAll('a');
-    console.log(urls);
+    const dom = new JSDOM(htmlBody, {
+        url: baseURL,
+    });
+    const anchors = dom.window.document.querySelectorAll('a');
+    const urls = []
+    for (const anchor of anchors) {
+        urls.push(anchor.href)
+    }
     return urls;
 }
 
