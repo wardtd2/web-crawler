@@ -1,13 +1,15 @@
 import { crawlPage } from "./crawl.js";
 
 function main() {
+    let baseURL;
     if (process.argv.length === 3) {
-        console.log(`Your designated base URL is: ${process.argv[2]}`);
+        baseURL = process.argv[2];
+        console.log(`Your designated base URL is: ${baseURL}`);
     } else {
         console.log("Incorrect number of arguments. Exiting...");
         return;
     }
-    const baseURL = process.argv[2];
+    
     crawlPage(baseURL);
 
 
