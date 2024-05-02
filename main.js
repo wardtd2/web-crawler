@@ -1,6 +1,6 @@
 import { crawlPage } from "./crawl.js";
 
-function main() {
+async function main() {
     let baseURL;
     if (process.argv.length === 3) {
         baseURL = process.argv[2];
@@ -10,7 +10,8 @@ function main() {
         return;
     }
     
-    crawlPage(baseURL);
+    const pages = await crawlPage(baseURL);
+    console.log(pages);
 
 
 }

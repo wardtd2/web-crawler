@@ -17,20 +17,20 @@ function getURLsFromHTML(htmlBody, baseURL) {
         url: baseURL,
     });
     const anchors = dom.window.document.querySelectorAll('a');
-    const urls = []
+    const urls = [];
     for (const anchor of anchors) {
-        urls.push(anchor.href)
+        urls.push(anchor.href);
     }
     return urls;
 }
 
 
-async function crawlPage(currentURL) {
+async function fetchPageContent(url) {
     let response;
     try {
-         response = await fetch(currentURL);
+         response = await fetch(url);
     } catch (err) {
-        console.log(`Unable to process request. Error provided: ${err.message}`)
+        console.log(`Unable to process request. Error provided: ${err.message}`);
         return;
     }
 
@@ -38,15 +38,40 @@ async function crawlPage(currentURL) {
         console.log(`Page responded with error code ${response.status}: ${response.statusText}`);
         return;
     }
-    const contentType = response.headers.get('Content-Type')
-    console.log(contentType);
+    const contentType = response.headers.get('Content-Type');
     if (!contentType || !contentType.includes('text/html')) {
         console.log(`Requested URL was not html, and was instead ${contentType}`);
         return;
     }
-    const body = await response.text();
-    console.log(body);
+    return await response.text();
+}
 
+
+async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
+    const base = new URL(baseURL);
+    const current = new URL(currentURL);
+    if (base.hostname !== currentURL.hostname) {
+        return pages;
+    }
+
+    const normalizedURL = normalizeURL(currentURL);
+    
+    if(Object.keys(pages).includes(normalizedURL)) {
+        pages[normalizedURL]++;
+        return pages;
+    }
+
+    pages[normalizedURL] = 1;
+
+    const pageContent = await fetchPageContent(normalizedURL);
+    
+    const urlsList = getURLsFromHTML(pageContent, baseURL);
+    
+    for (url of urlsList){
+        pages = await crawlPage(baseURL, url, pages);
+    }
+
+    return pages;
     
    
 }
