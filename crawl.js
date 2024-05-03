@@ -27,8 +27,9 @@ function getURLsFromHTML(htmlBody, baseURL) {
 
 async function fetchPageContent(url) {
     let response;
+    const requestURL = `https://${url}`
     try {
-         response = await fetch(url);
+         response = await fetch(requestURL);
     } catch (err) {
         console.log(`Unable to process request. Error provided: ${err.message}`);
         return;
@@ -40,7 +41,7 @@ async function fetchPageContent(url) {
     }
     const contentType = response.headers.get('Content-Type');
     if (!contentType || !contentType.includes('text/html')) {
-        console.log(`Requested URL was not html, and was instead ${contentType}`);
+        console.log(`Requested URL: ${url} was not html, and was instead ${contentType}`);
         return;
     }
     return await response.text();
@@ -50,7 +51,7 @@ async function fetchPageContent(url) {
 async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
     const base = new URL(baseURL);
     const current = new URL(currentURL);
-    if (base.hostname !== currentURL.hostname) {
+    if (base.hostname !== current.hostname) {
         return pages;
     }
 
@@ -62,12 +63,11 @@ async function crawlPage(baseURL, currentURL = baseURL, pages = {}) {
     }
 
     pages[normalizedURL] = 1;
-
     const pageContent = await fetchPageContent(normalizedURL);
     
     const urlsList = getURLsFromHTML(pageContent, baseURL);
     
-    for (url of urlsList){
+    for (const url of urlsList){
         pages = await crawlPage(baseURL, url, pages);
     }
 
